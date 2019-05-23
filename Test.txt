@@ -1,2 +1,0 @@
-This is the test program
-Hello testing Github
