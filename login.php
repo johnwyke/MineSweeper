@@ -6,20 +6,43 @@
 
 		
 
-			<form action='#' method='post'>
+			<form action='confirm.php' method='post'>
 				Name: <input type="text" name="username" placeholder="enter name"> <br><br>
-			 Password: <input type='password' name='password' id='password' size='25' /> <br><br>
-			 <input type='button' id='login' value='Log in' /><br/>
-			 SHA256 hash string:<br/>
-			<input type='text' name='strcrypt' id='strcrypt' size='58' />
+			 	Password: <input type='password' name='password' id='password' size='25' /> <br><br>
+			 	<input type="hidden" id="encryptedPassword" name="encryptedPassword">
+				<button type ="submit" id='login' name="login2" value="send to database"> Log In</button>
 			</form>
+			<p>
+				<?php
+					$login = "";
+					session_start();
+					$login = $_SESSION['user_login'];
+					if($login == "failed")
+					{
+						echo "User or password are incorrect";
+					}
+					$_SESSION['user_login'] = "";
+					$_SESSION["user_exists"] = "";
+					
+
+				?>
+			</p>
+
+
 		<script>
 
 			/**
 * Secure Hash Algorithm (SHA256)
 * http://www.webtoolkit.info/
 * Original code by Angel Marin, Paul Johnston
+
 **/
+
+
+
+
+
+
 
 function SHA256(s){var chrsz=8;var hexcase=0;function safe_add(x,y){var lsw=(x&0xFFFF)+(y&0xFFFF);var msw=(x>>16)+(y>>16)+(lsw>>16);return(msw<<16)|(lsw&0xFFFF);}
 function S(X,n){return(X>>>n)|(X<<(32-n));}
@@ -45,12 +68,13 @@ return str;}
 s=Utf8Encode(s);return binb2hex(core_sha256(str2binb(s),s.length*chrsz));}
 
 // register onclick events for Encrypt button
-document.getElementById('login').onclick = function(){
+document.getElementById('password').onkeyup = function(){
  // gets data from input text
  var txt_string = document.getElementById('password').value;
 
  // encrypts data and adds it in #strcrypt element
- document.getElementById('strcrypt').value = SHA256(txt_string);
+ document.getElementById('encryptedPassword').value = SHA256(txt_string);
+
  return false;
 }
 		</script>
