@@ -19,8 +19,7 @@
 					session_start();
 					$login = $_SESSION['user_login'];
 
-					$user = $_SESSION["user_name"];
-					echo $user;
+				
 
 					if($login == "failed")
 					{

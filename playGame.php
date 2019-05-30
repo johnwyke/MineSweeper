@@ -13,8 +13,6 @@
 		<p>
 <?php
 			session_start();
-			/*setcookie("username", $user, time() +600);
-			echo $_COOKIE['username'];*/
 			$user = $_SESSION["user_name"];
 			echo "Welcome ".$user;
 
