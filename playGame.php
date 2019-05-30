@@ -13,6 +13,8 @@
 		<p>
 <?php
 			session_start();
+			/*setcookie("username", $user, time() +600);
+			echo $_COOKIE['username'];*/
 			$user = $_SESSION["user_name"];
 			echo "Welcome ".$user;
 
@@ -22,6 +24,7 @@
         	{
         			session_start();
 					$_SESSION["user_name"] = "";
+					unset($_SESSION['user_name']);
 					header("Refresh: 1; url = http://cs3750juan.epizy.com/login.php");
 					             	
 			}

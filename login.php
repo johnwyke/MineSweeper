@@ -12,11 +12,16 @@
 			 	<input type="hidden" id="encryptedPassword" name="encryptedPassword">
 				<button type ="submit" id='login' name="login2" value="send to database"> Log In</button>
 			</form>
+			<a href="http://cs3750juan.epizy.com/newUser.php">New User</a>
 			<p>
 				<?php
 					$login = "";
 					session_start();
 					$login = $_SESSION['user_login'];
+
+					$user = $_SESSION["user_name"];
+					echo $user;
+
 					if($login == "failed")
 					{
 						echo "User or password are incorrect";
@@ -30,19 +35,6 @@
 
 
 		<script>
-
-			/**
-* Secure Hash Algorithm (SHA256)
-* http://www.webtoolkit.info/
-* Original code by Angel Marin, Paul Johnston
-
-**/
-
-
-
-
-
-
 
 function SHA256(s){var chrsz=8;var hexcase=0;function safe_add(x,y){var lsw=(x&0xFFFF)+(y&0xFFFF);var msw=(x>>16)+(y>>16)+(lsw>>16);return(msw<<16)|(lsw&0xFFFF);}
 function S(X,n){return(X>>>n)|(X<<(32-n));}
