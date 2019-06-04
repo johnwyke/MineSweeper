@@ -280,12 +280,12 @@
 				echo '<tr>';
 				for($c=0; $c<$colCount-1; $c++){
 					echo '<td>';
-					echo '<a href>.</a>';
-					/*if ($gameBoard[$r][$c]->get_mine()){
+					//echo '<a href>.</a>';
+					if ($gameBoard[$r][$c]->get_mine()){
 						echo "*"; 
 					}elseif($gameBoard[$r][$c]->get_value()!=0) {
 						echo $gameBoard[$r][$c]->get_value();
-					}*/
+					}
 				}// End of Inner for 			
 			}// End of outer for 
 		?>
