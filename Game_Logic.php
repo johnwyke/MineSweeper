@@ -10,19 +10,19 @@
 				
 				// Constructor
 				public function __construct(){
-					$mine = false;
+					$mine = 0;
 					$value = 0;
 				}
 				// function to return mine or not
 				public function get_mine(){
-						if ($this->mine == true){
+						if ($this->value == -1){
 							return true; 
 						}
 						return false;
 					
 				}
 				public function set_mine($bool){
-				$this->mine = $bool;
+				$this->value = -1;
 				}
 				
 				public function inc_value(){
@@ -31,6 +31,7 @@
 				public function get_value(){return $this->value;}
 			}
 			
+			function init_Game(){
 			
 			//*******************
 			// Start of Game Logic 
@@ -41,16 +42,14 @@
 			$colCount = 15;
 			$rowCount = 15;
 			
-			// Init game board
-			for($r =0;  $r <$rowCount; $r++){
+				for($r =0;  $r <$rowCount; $r++){
 				for($c=0; $c<$colCount; $c++){
 					$gameBoard[$r][$c] = new cell();
 				}// End of Inner for 			
 			}// End of outer for 
-			
-			// Fill the Game Board with Mines 
+				// Fill the Game Board with Mines 
 				$mc =0;		
-			while($mc < $numbOfMines){
+				while($mc < $numbOfMines){
 				
 				$xCord = rand(0,$colCount-1);
 				$yCord = rand(0,$rowCount-1);
@@ -74,14 +73,12 @@
 				$mc++;
 			}// End of outer for 
 			
-			
-			// TODO: Check neighbors for mines Then Set value
-			
-			for($r=0; $r<$rowCount-1; $r++){
-				for($c=0; $c<$colCount-1; $c++){
+			for($r=0; $r<$rowCount; $r++){
+				for($c=0; $c<$colCount; $c++){
 					
 					// If I am a mine Move to next
 					if($gameBoard[$r][$c]->get_mine()){
+						$arr [$r . "-" .$c] = $gameBoard[$r][$c]->get_value();
 						continue;
 					}
 					
@@ -239,23 +236,35 @@
 								
 							}
 						}									
+				
+				// This Creates Dictionary for JSON Conversion. Single Array Format (Row - Col : Value) 
+				$arr [$r . "-" .$c] = $gameBoard[$r][$c]->get_value();
 				}// End Inner 
 			}// End Outer 
+			//}
 			
-			// this is a test
-			for($r =0;  $r <$rowCount-1; $r++){
-				for($c=0; $c<$colCount-1; $c++){
-					
-					//var_dump($gameBoard[$r][$c]->get_mine());
-					if ($gameBoard[$r][$c]->get_mine()){
-						echo " I have a mine at cell Row: " .$r . " Col: ". $c . "<br>"; 
-					}elseif($gameBoard[$r][$c]->get_value()!=0) {
-						echo "I have " . $gameBoard[$r][$c]->get_value() ." Mines Close to me <br>";
-					}
-				
-					
-				}// End of Inner for 			
-			}// End of outer for 	
+			$JSONBoard = json_encode($arr);
+			
+			$_SESSION['board']= $JSONBoard;
+			} //End Function 
+			echo " This is be for JSON ";
+			session_start();
+			// TODO: Need to PUt Json in session Variable 
+			// Also need to set init Function for Game Board then Check Session to initalization 
+			// Run the INital Board ONly Once.
+			if(!isset($_SESSION['board'])){
+				//echo "I am starting init game ";
+				init_Game();				
+				//echo "I have finished init Game";
+			}
+			
+			
+			
+			
+			
+			
+			echo $_SESSION['board'];
+			//session_destroy();
 		?>
 	</body>
 </html>
