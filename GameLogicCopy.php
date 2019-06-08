@@ -263,7 +263,7 @@
 			</style>
 			<table border="1">
 			<script type="text/javascript">
-				var counter = 0
+				var counter = 0;
 				var timer;
 				if(sessionStorage.getItem("seconds") != null)
 				{
@@ -276,13 +276,14 @@
 					
 				function countUP () {
 
-					
+					//window.alert(sessionStorage.getItem("seconds"));
 					 counter = counter + 1;//increment the counter by 1
 					 	//display the new value in the div
 					 document.getElementById("timer_container").innerHTML = counter;
+					 sessionStorage.setItem("seconds",counter);
 					 
 				 }
-				 sessionStorage.setItem("seconds",counter);
+				 
 				 
 			</script>
 			<body onload='timer=setInterval("countUP()", 1000 );'>
