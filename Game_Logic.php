@@ -7,13 +7,14 @@
 			class cell{
 				private $mine; 
 				private $value; 
-				
+				private $beenChecked;
 				// Constructor
 				public function __construct(){
 					$mine = 0;
 					$value = 0;
+					$beenChecked = false;
 				}
-				// function to return mine or not
+				// Getters and Setter for mine status
 				public function get_mine(){
 						if ($this->value == -1){
 							return true; 
@@ -25,12 +26,22 @@
 				$this->value = -1;
 				}
 				
+				// INcrement the number value if not a mine
 				public function inc_value(){
 					$this->value++;
 				}
 				public function get_value(){return $this->value;}
+				
+				// Getters and Setter for been Checked
+				public function set_beenChecked($bool){
+					$this->beenChecked = $bool; 
+				}
+				public function get_beenChecked(){
+					return $this->beenChecked;
+				
 			}
 			
+			// Initialize the game Board 
 			function init_Game(){
 			
 			//*******************
@@ -43,10 +54,10 @@
 			$rowCount = 15;
 			
 				for($r =0;  $r <$rowCount; $r++){
-				for($c=0; $c<$colCount; $c++){
-					$gameBoard[$r][$c] = new cell();
-				}// End of Inner for 			
-			}// End of outer for 
+					for($c=0; $c<$colCount; $c++){
+						$gameBoard[$r][$c] = new cell();
+					}// End of Inner for 			
+				}// End of outer for 
 				// Fill the Game Board with Mines 
 				$mc =0;		
 				while($mc < $numbOfMines){
@@ -238,7 +249,9 @@
 						}									
 				
 				// This Creates Dictionary for JSON Conversion. Single Array Format (Row - Col : Value) 
-				$arr [$r . "-" .$c] = $gameBoard[$r][$c]->get_value();
+				//$arr [$r . "-" .$c] = $gameBoard[$r][$c]->get_value();
+				$arr [$r . "-" .$c] = json_encode($gameBoard[$r][$c]);
+				echo " I have stored an cell object in Associative array";
 				}// End Inner 
 			}// End Outer 
 			//}
@@ -249,8 +262,7 @@
 			} //End Function 
 			echo " This is be for JSON ";
 			session_start();
-			// TODO: Need to PUt Json in session Variable 
-			// Also need to set init Function for Game Board then Check Session to initalization 
+			
 			// Run the INital Board ONly Once.
 			if(!isset($_SESSION['board'])){
 				//echo "I am starting init game ";
@@ -259,7 +271,47 @@
 			}
 			
 			
+			// Function setting the cell been checked to true
+			// then saving session variable again. 
+			/*
+			function setAndSave($cRow, $cCol){
+				$gameBoard[$cRow][$cCol]->beenChecked = true;
+				checkWinner();
+				
+				// If Session is not win or loose update Table 
+				
+			}
 			
+			// This Function checks winning condition. It will be called after every click in Javascript
+			function checkWinner(){
+				session_start();
+				for($r =0;  $r <$rowCount; $r++){
+					for($c=0; $c<$colCount; $c++){
+						//First Check if Mine if not a mine check viewed Value
+						if (gameBoard[$r][$c]->mine != -1){
+							
+							// Checking Been Checked Value 
+							if (!$gameBoard[$r][$c]->beenChecked){
+								// Not All Cells have been checked
+								$_SESSION['status'] = 0;
+								return;
+							}
+						}else if (gameBoard[$r][$c]->mine == -1 && $gameBoard[$r][$c]->beenChecked){
+							// They Lost the Game
+							$_SESSION['status'] = -1;
+							return;
+						}
+						
+					}// End Innner
+					
+				}// end Outer
+				
+				$_SESSION['status'] = 1;
+				
+			}
+			
+			
+			*/
 			
 			
 			
