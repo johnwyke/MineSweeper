@@ -250,8 +250,8 @@
 				
 				// This Creates Dictionary for JSON Conversion. Single Array Format (Row - Col : Value) 
 				//$arr [$r . "-" .$c] = $gameBoard[$r][$c]->get_value();
-				$arr [$r . "-" .$c] = {"value":$gameBoard[$r][$c]->get_value(),"beenChecked":$gameBoard[$r][$c]->get_beenChecked()};				
-				//echo " I have stored an cell object in Associative array";
+				$arr [$r . "-" .$c] = "value":$gameBoard[$r][$c]->get_value(),"beenChecked":$gameBoard[$r][$c]->get_beenChecked();				
+				echo " I have stored an cell object in Associative array";
 				}// End Inner 
 			}// End Outer 
 			//}
@@ -315,10 +315,10 @@
 			
 			*/
 			
-			 $list = json_decode($_SESSION['board'],true);
+		//	 $list = json_decode($_SESSION['board'],true);
 			// var_dump($list);
-			$x = $list["0-0"];
-			var_dump($x->get_value());
+		//	$x = $list["0-0"];
+		//	var_dump($x->get_value());
 			//echo json_decode($_SESSION['board']);
 			session_destroy();
 		?>
