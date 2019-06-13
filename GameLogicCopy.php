@@ -276,7 +276,6 @@
 					
 				function countUP () {
 
-					//window.alert(sessionStorage.getItem("seconds"));
 					 counter = counter + 1;//increment the counter by 1
 					 	//display the new value in the div
 					 document.getElementById("timer_container").innerHTML = counter;
