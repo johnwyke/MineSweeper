@@ -265,9 +265,9 @@
 			<script type="text/javascript">
 				var counter = 0;
 				var timer;
-				if(sessionStorage.getItem("seconds") != null)
+				if(localStorage.getItem("seconds") != null)
 				{
-					counter = parseInt(sessionStorage.getItem("seconds"));					
+					counter = parseInt(localStorage.getItem("seconds"));
 				}
 				else
 				{
@@ -280,7 +280,7 @@
 					 counter = counter + 1;//increment the counter by 1
 					 	//display the new value in the div
 					 document.getElementById("timer_container").innerHTML = counter;
-					 sessionStorage.setItem("seconds",counter);
+					localStorage.setItem("seconds",counter);
 					 
 				 }
 				 
