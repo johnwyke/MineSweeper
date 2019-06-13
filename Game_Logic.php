@@ -87,12 +87,12 @@
 				for($c=0; $c<$colCount; $c++){
 					
 					// If I am a mine Move to next
-					if($gameBoard[$r][$c]->get_mine()){
+					/*if($gameBoard[$r][$c]->get_mine()){
 						//$arr [$r . "-" .$c] = $gameBoard[$r][$c]->get_value();
 						$arr [$r . "-" .$c] = json_encode($gameBoard[$r][$c],JSON_FORCE_OBJECT);
 						continue;
-					}
-					
+					}*/
+					if(!$gameBoard[$r][$c]->get_mine()){
 					if($r==0){
 						// Skip checking Top
 							if($c ==0){
@@ -246,12 +246,13 @@
 								}
 								
 							}
-						}									
+						}
+					}						
 				
 				// This Creates Dictionary for JSON Conversion. Single Array Format (Row - Col : Value) 
 				//$arr [$r . "-" .$c] = $gameBoard[$r][$c]->get_value();
-				$arr [$r . "-" .$c] = "value":$gameBoard[$r][$c]->get_value(),"beenChecked":$gameBoard[$r][$c]->get_beenChecked();				
-				echo " I have stored an cell object in Associative array";
+				$arr [$r . "-" .$c] = array("value"=>$gameBoard[$r][$c]->get_value(),"beenChecked"=>$gameBoard[$r][$c]->get_beenChecked());				
+				//echo " I have stored an cell object in Associative array";
 				}// End Inner 
 			}// End Outer 
 			//}
@@ -315,10 +316,12 @@
 			
 			*/
 			
-		//	 $list = json_decode($_SESSION['board'],true);
-			// var_dump($list);
-		//	$x = $list["0-0"];
-		//	var_dump($x->get_value());
+			 $list = json_decode($_SESSION['board'],true);
+			 var_dump($list);
+			$x = $list["0-0"];
+			echo " THis is before the specific Value <br>";
+			var_dump($x);
+			echo $x["value"];
 			//echo json_decode($_SESSION['board']);
 			session_destroy();
 		?>
