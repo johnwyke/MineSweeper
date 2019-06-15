@@ -263,7 +263,6 @@
 			$_SESSION['board']= $JSONBoard;
 			} //End Function
 			
-			echo " This is be for JSON ";
 			session_start();
 			
 			// Run the Inital Board ONly Once.
@@ -276,9 +275,17 @@
 			
 			// Function setting the cell been checked to true
 			// then saving session variable again. 
-			/*
+			
 			function setAndSave($cRow, $cCol){
-				$gameBoard[$cRow][$cCol]->beenChecked = true;
+				$selectedCell = $cRow . '-' . $cCol;
+				$individualCell;
+				$list = json_decode($_SESSION['board'],true);
+				
+				$individualCell = $list[selectedCell];
+				$individualCell['beenChecked'] = true;
+				
+				//$gameBoard[$cRow][$cCol]->beenChecked = true;
+				
 				checkWinner();
 				
 				// If Session is not win or loose update Table 
@@ -288,6 +295,8 @@
 			// This Function checks winning condition. It will be called after every click in Javascript
 			function checkWinner(){
 				session_start();
+				
+
 				for($r =0;  $r <$rowCount; $r++){
 					for($c=0; $c<$colCount; $c++){
 						//First Check if Mine if not a mine check viewed Value
@@ -314,16 +323,16 @@
 			}
 			
 			
-			*/
 			
-			 $list = json_decode($_SESSION['board'],true);
-			 var_dump($list);
-			$x = $list["0-0"];
-			echo " THis is before the specific Value <br>";
-			var_dump($x);
-			echo $x["value"];
+			
+			 //$list = json_decode($_SESSION['board'],true);
+			 //var_dump($list);
+			//$x = $list["0-0"];
+			//echo " THis is before the specific Value <br>";
+			v//ar_dump($x);
+			//echo $x["value"];
 			//echo json_decode($_SESSION['board']);
-			session_destroy();
+			//session_destroy();
 		?>
 	</body>
 </html>
