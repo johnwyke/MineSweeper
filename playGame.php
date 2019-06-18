@@ -10,6 +10,14 @@
     	</form>
     	<input type ="button" name="stop" value="Stop Me" onclick="stopCounter();" />	
 		<p>
+			<script type="text/javascript">
+			function clearTimer()
+				 {
+				 	counter = 0;
+				 	localStorage.setItem("seconds",counter);
+				 }
+				  
+			</script>
 		<?php
 			session_start();
 			$user = $_SESSION["user_name"];
@@ -18,9 +26,13 @@
 			if (isset($_POST['logout']))
         	{
         			session_start();
-        			echo "<script> window.onload = function() {
+
+        			echo '<script type="text/javascript">',
+     					'clearTimer();',
+    					 '</script>';
+        			/*echo "<script> window.onload = function() {
      						stopCounter();
- 						}; </script>";
+ 						}; </script>";*/
 					$_SESSION["user_name"] = "";
 					unset($_SESSION['user_name']);
 					header("Refresh: 1; url = http://cs3750juan.epizy.com/login.php");		             	
@@ -347,6 +359,11 @@
 				 		//$('#result').html(data);	
 				 	});
 				 	counter = 0;
+				 }
+				 function clearTimer()
+				 {
+				 	counter = 0;
+				 	localStorage.setItem("seconds",counter);
 				 }
 				 
 				 
