@@ -12,7 +12,7 @@
 				public function __construct(){
 					$mine = 0;
 					$value = 0;
-					$beenChecked = false;
+					$beenChecked = 0;
 				}
 				// Getters and Setter for mine status
 				public function get_mine(){
@@ -33,8 +33,8 @@
 				public function get_value(){return $this->value;}
 				
 				// Getters and Setter for been Checked
-				public function set_beenChecked($bool){
-					$this->beenChecked = $bool; 
+				public function set_beenChecked($numb){
+					$this->beenChecked = $numb; 
 				}
 				public function get_beenChecked(){
 					return $this->beenChecked;
@@ -282,7 +282,7 @@
 				$list = json_decode($_SESSION['board'],true);
 				
 				$individualCell = $list[selectedCell];
-				$individualCell['beenChecked'] = true;
+				$individualCell['beenChecked'] = 1;
 				
 				//$gameBoard[$cRow][$cCol]->beenChecked = true;
 				
@@ -303,12 +303,12 @@
 						if (gameBoard[$r][$c]->mine != -1){
 							
 							// Checking Been Checked Value 
-							if (!$gameBoard[$r][$c]->beenChecked){
+							if ($gameBoard[$r][$c]->beenChecked == 0){
 								// Not All Cells have been checked
 								$_SESSION['status'] = 0;
 								return;
 							}
-						}else if (gameBoard[$r][$c]->mine == -1 && $gameBoard[$r][$c]->beenChecked){
+						}else if (gameBoard[$r][$c]->mine == -1 && $gameBoard[$r][$c]->beenChecked == 1){
 							// They Lost the Game
 							$_SESSION['status'] = -1;
 							return;
@@ -325,12 +325,13 @@
 			
 			
 			
-			 //$list = json_decode($_SESSION['board'],true);
+			// $list = json_decode($_SESSION['board'],true);
 			 //var_dump($list);
-			//$x = $list["0-0"];
+			//$x = $list['0-0'];
 			//echo " THis is before the specific Value <br>";
-			v//ar_dump($x);
-			//echo $x["value"];
+			//var_dump($x);
+			//$x['beenChecked'] = 1;
+			//echo $x["beenChecked"];
 			//echo json_decode($_SESSION['board']);
 			//session_destroy();
 		?>
