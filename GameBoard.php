@@ -1,252 +1,454 @@
-<?php
-define('MINEGRID_WIDTH',  10);
-define('MINEGRID_HEIGHT', 10);
-
-define('MINESWEEPER_NOT_EXPLORED', -1);
-define('MINESWEEPER_MINE',         -2);
-define('MINESWEEPER_FLAGGED',      -3);
-define('MINESWEEPER_FLAGGED_MINE', -4);
-define('ACTIVATED_MINE',           -5);
-
-function check_field($field) {
-    if ($field === MINESWEEPER_MINE || $field === MINESWEEPER_FLAGGED_MINE) {
-        return true;
-    }
-    else {
-        return false;
-    }
-}
-
-function explore_field($field) {
-    if (!isset($_SESSION['minesweeper'][$field])
-     || !in_array($_SESSION['minesweeper'][$field],
-                  array(MINESWEEPER_NOT_EXPLORED, MINESWEEPER_FLAGGED))) {
-        return;
-    }
-
-    $mines = 0;
-
-    // Make reference to that long name
-    $fields  = &$_SESSION['minesweeper'];
-
-    // left side options
-    if ($field % MINEGRID_WIDTH !== 1) {
-        $mines += check_field(@$fields[$field - MINEGRID_WIDTH - 1]);
-        $mines += check_field(@$fields[$field - 1]);
-        $mines += check_field(@$fields[$field + MINEGRID_WIDTH - 1]);
-    }
-
-    // bottom and top
-    $mines += check_field(@$fields[$field - MINEGRID_WIDTH]);
-    $mines += check_field(@$fields[$field + MINEGRID_WIDTH]);
-
-    // right side options
-    if ($field % MINEGRID_WIDTH !== 0) {
-        $mines += check_field(@$fields[$field - MINEGRID_WIDTH + 1]);
-        $mines += check_field(@$fields[$field + 1]);
-        $mines += check_field(@$fields[$field + MINEGRID_WIDTH + 1]);
-    }
-
-    $fields[$field] = $mines;
-
-    if ($mines === 0) {
-        if ($field % MINEGRID_WIDTH !== 1) {
-            explore_field($field - MINEGRID_WIDTH - 1);
-            explore_field($field - 1);
-            explore_field($field + MINEGRID_WIDTH - 1);
-        }
-
-        explore_field($field - MINEGRID_WIDTH);
-        explore_field($field + MINEGRID_WIDTH);
-
-        if ($field % MINEGRID_WIDTH !== 0) {
-            explore_field($field - MINEGRID_WIDTH + 1);
-            explore_field($field + 1);
-            explore_field($field + MINEGRID_WIDTH + 1);
-        }
-    }
-}
-
-session_start(); // will start session storage
-
-if (!isset($_SESSION['minesweeper'])) {
-    // Fill grid with not explored tiles
-    $_SESSION['minesweeper'] = array_fill(1,
-                                         MINEGRID_WIDTH * MINEGRID_HEIGHT,
-                                         MINESWEEPER_NOT_EXPLORED);
-
-    // Generate random number of mines between 0.1 and 0.2
-    $number_of_mines = (int) mt_rand(0.1 * MINEGRID_WIDTH * MINEGRID_HEIGHT,
-                                     0.2 * MINEGRID_WIDTH * MINEGRID_HEIGHT);
-
-    // generate mines randomly
-    $random_keys = array_rand($_SESSION['minesweeper'], $number_of_mines);
-
-    foreach ($random_keys as $key) {
-        $_SESSION['minesweeper'][$key] = MINESWEEPER_MINE;
-    }
-
-    // to make calculations shorter use SESSION variable to store the result
-    $_SESSION['numberofmines'] = $number_of_mines;
-}
-
-if (isset($_GET['explore'])) {
-    if(isset($_SESSION['minesweeper'][$_GET['explore']])) {
-        switch ($_SESSION['minesweeper'][$_GET['explore']]) {
-            case MINESWEEPER_NOT_EXPLORED:
-                explore_field($_GET['explore']);
-                break;
-            case MINESWEEPER_MINE:
-                $lost = 1;
-                $_SESSION['minesweeper'][$_GET['explore']] = ACTIVATED_MINE;
-                break;
-            default:
-                // The tile was discovered already. Ignore it.
-                break;
-        }
-    }
-    else {
-        die('Tile doesn\'t exist.');
-    }
-}
-elseif (isset($_GET['flag'])) {
-    if(isset($_SESSION['minesweeper'][$_GET['flag']])) {
-        $tile = &$_SESSION['minesweeper'][$_GET['flag']];
-        switch ($tile) {
-            case MINESWEEPER_NOT_EXPLORED:
-                $tile = MINESWEEPER_FLAGGED;
-                break;
-            case MINESWEEPER_MINE:
-                $tile = MINESWEEPER_FLAGGED_MINE;
-                break;
-            case MINESWEEPER_FLAGGED:
-                $tile = MINESWEEPER_NOT_EXPLORED;
-                break;
-            case MINESWEEPER_FLAGGED_MINE:
-                $tile = MINESWEEPER_MINE;
-                break;
-            default:
-                // This tile shouldn't be flagged. Ignore it.
-                break;
-        }
-    }
-    else {
-        die('Tile doesn\'t exist.');
-    }
-}
-
-// Check if the player won...
-if (!in_array(MINESWEEPER_NOT_EXPLORED, $_SESSION['minesweeper'])
- && !in_array(MINESWEEPER_FLAGGED,      $_SESSION['minesweeper'])) {
-    $won = true;
-}
-?>
-<!DOCTYPE html>
-<title>Minesweeper</title>
-<style>
-table {
-    border-collapse: collapse;
-}
-
-td, a {
-    text-align:      center;
-    width:           1em;
-    height:          1em;
-}
-
-a {
-    display:         block;
-    color:           black;
-    text-decoration: none;
-    font-size:       2em;
-}
-</style>
-<script>
-function flag(number, e) {
-    if (e.which === 2 || e.which === 3) {
-        location = '?flag=' + number;
-        return false;
-    }
-}
-</script>
-<?php
-    echo "<p>This field contains $_SESSION[numberofmines] mines.";
-?>
-<table border="1">
-<?php
-// array_shift() affects array, so we need a copy
-$mine_copy = $_SESSION['minesweeper'];
-
-for ($x = 1; $x <= MINEGRID_HEIGHT; $x++) {
-    echo '<tr>';
-    for ($y = 1; $y <= MINEGRID_WIDTH; $y++) {
-        echo '<td>';
-
-        $number = array_shift($mine_copy);
-        switch ($number) {
-            case MINESWEEPER_FLAGGED:
-            case MINESWEEPER_FLAGGED_MINE:
-                if (!empty($lost) || !empty($won)) {
-                    if ($number === MINESWEEPER_FLAGGED_MINE) {
-                        echo '<a>*</a>';
-                    }
-                    else {
-                        echo '<a>.</a>';
-                    }
-                }
-                else {
-                    echo '<a href=# onmousedown="return flag(',
-                         ($x - 1) * MINEGRID_WIDTH + $y,
-                         ',event)" oncontextmenu="return false">?</a>';
-                }
-                break;
-            case ACTIVATED_MINE:
-                echo '<a>:(</a>';
-                break;
-            case MINESWEEPER_MINE:
-            case MINESWEEPER_NOT_EXPLORED:
-                // oncontextmenu causes the menu to disappear in
-                // Firefox, IE and Chrome
-
-                // In case of Opera, modifying location causes menu
-                // to not appear.
-
-                if (!empty($lost)) {
-                    if ($number === MINESWEEPER_MINE) {
-                        echo '<a>*</a>';
-                    }
-                    else {
-                        echo '<a>.</a>';
-                    }
-                }
-                elseif (!empty($won)) {
-                    echo '<a>*</a>';
-                }
-                else {
-                    echo '<a href="?explore=',
-                         ($x - 1) * MINEGRID_WIDTH + $y,
-                         '" onmousedown="return flag(',
-                         ($x - 1) * MINEGRID_WIDTH + $y,
-                         ',event)" oncontextmenu="return false">.</a>';
-                }
-                break;
-            case 0:
-                echo '<a></a>';
-                break;
-            default:
-                echo '<a>', $number, '</a>';
-                break;
-        }
-    }
-}
-?>
-</table>
-<?php
-if (!empty($lost)) {
-    unset($_SESSION['minesweeper']);
-    echo '<p>You lost :(. <a href="?">Reboot?</a>';
-}
-elseif (!empty($won)) {
-    unset($_SESSION['minesweeper']);
-    echo '<p>Congratulations. You won :).';
-}
+<html> 
+	<head> 
+		<style>
+			td{
+				text-align:      center;
+				width:           3em;
+				height:          3em;				
+			}
+		</style>
+	</head>
+	
+	<body> 
+		<?php
+			class cell{
+				private $mine; 
+				private $value; 
+				private $beenChecked;
+				// Constructor
+				public function __construct(){
+					$mine = 0;
+					$value = 0;
+					$beenChecked = 0;
+				}
+				// Getters and Setter for mine status
+				public function get_mine(){
+						if ($this->value == -1){
+							return true; 
+						}
+						return false;
+					
+				}
+				public function set_mine($bool){
+				$this->value = -1;
+				}
+				
+				// INcrement the number value if not a mine
+				public function inc_value(){
+					$this->value++;
+				}
+				public function get_value(){return $this->value;}
+				
+				// Getters and Setter for been Checked
+				public function set_beenChecked($numb){
+					$this->beenChecked = $numb; 
+				}
+				public function get_beenChecked(){
+					return $this->beenChecked;
+				}
+			}
+			
+			// Initialize the game Board 
+			function init_Game(){
+			
+			//*******************
+			// Start of Game Logic 
+			//*******************
+			
+			// Vars 
+			$numbOfMines = 10;
+			$colCount = 9;
+			$rowCount = 9;
+			
+				for($r =0;  $r <$rowCount; $r++){
+					for($c=0; $c<$colCount; $c++){
+						$gameBoard[$r][$c] = new cell();
+					}// End of Inner for 			
+				}// End of outer for 
+				// Fill the Game Board with Mines 
+				$mc =0;		
+				while($mc < $numbOfMines){
+				
+				$xCord = rand(0,$colCount-1);
+				$yCord = rand(0,$rowCount-1);
+				
+				//if mine is already present
+				// If it is start loop again 
+				
+				
+				if($gameBoard[$yCord][$xCord]->get_mine()){
+					echo "I am at a cell with a mine already";
+					// Mine is already set try agian.
+					$mc--;
+					continue;
+				}			
+				
+				echo "Placing mine ";
+				$gameBoard[$yCord][$xCord]->set_mine(true); 
+				
+				echo "I am at position Row: " . $yCord ." Col: ".$xCord . "<br>";
+				$mc++;
+			}// End of outer for 
+			
+			for($r=0; $r<$rowCount; $r++){
+				for($c=0; $c<$colCount; $c++){
+					
+					// If I am a mine Move to next
+					/*if($gameBoard[$r][$c]->get_mine()){
+						//$arr [$r . "-" .$c] = $gameBoard[$r][$c]->get_value();
+						$arr [$r . "-" .$c] = json_encode($gameBoard[$r][$c],JSON_FORCE_OBJECT);
+						continue;
+					}*/
+					if(!$gameBoard[$r][$c]->get_mine()){
+					if($r==0){
+						// Skip checking Top
+							if($c ==0){
+								// First in Col Only Check right
+								if ($gameBoard[$r][$c+1]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+								if ($gameBoard[$r+1][$c]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+								if ($gameBoard[$r+1][$c+1]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+							}elseif ($c == $colCount-1){
+								//Last in Col only check left
+								if ($gameBoard[$r][$c-1]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+								if ($gameBoard[$r+1][$c]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+								if ($gameBoard[$r+1][$c-1]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+							}elseif($c!=0 && $c != $colCount-1){
+								
+								// Check Both
+								if ($gameBoard[$r][$c+1]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+								if ($gameBoard[$r][$c-1]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+								if ($gameBoard[$r+1][$c+1]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+								if ($gameBoard[$r+1][$c-1]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+								if ($gameBoard[$r+1][$c]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+							}
+							
+							
+						}elseif ($r == $rowCount-1){
+							// Skipcheck bottom
+							if($c ==0){
+								// First in Col Only Check right
+								if ($gameBoard[$r][$c+1]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+								if ($gameBoard[$r-1][$c]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+								if ($gameBoard[$r-1][$c+1]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+							}elseif ($c == $colCount-1){
+								//Last in Col only check left
+								if ($gameBoard[$r][$c-1]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+								if ($gameBoard[$r-1][$c]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+								if ($gameBoard[$r-1][$c-1]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+							}elseif($c!=0 && $c != $colCount-1){
+								
+								// Check Both
+								if ($gameBoard[$r][$c+1]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+								if ($gameBoard[$r][$c-1]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+								if ($gameBoard[$r-1][$c+1]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+								if ($gameBoard[$r-1][$c-1]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+								if ($gameBoard[$r-1][$c]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+							}
+						}else{
+							//Check all three
+							if($c ==0){
+								// First Col 
+								if ($gameBoard[$r][$c+1]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+								if ($gameBoard[$r-1][$c]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+								if ($gameBoard[$r-1][$c+1]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+								if ($gameBoard[$r+1][$c+1]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+								if ($gameBoard[$r+1][$c]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+							}elseif ($c == $colCount-1){
+								//Last in Col only check left
+								if ($gameBoard[$r][$c-1]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+								if ($gameBoard[$r-1][$c]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+								if ($gameBoard[$r-1][$c-1]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+								if ($gameBoard[$r+1][$c]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+								if ($gameBoard[$r+1][$c-1]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+							}elseif($c!=0 && $c != $colCount-1){
+								
+								// Check Both
+								if ($gameBoard[$r][$c+1]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+								if ($gameBoard[$r][$c-1]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+								if ($gameBoard[$r-1][$c+1]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+								if ($gameBoard[$r-1][$c-1]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+								if ($gameBoard[$r-1][$c]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+								if ($gameBoard[$r+1][$c]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+								if ($gameBoard[$r+1][$c+1]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+								if ($gameBoard[$r+1][$c-1]->get_mine()){
+									$gameBoard[$r][$c]->inc_value();
+								}
+								
+							}
+						}
+					}						
+				
+				// This Creates Dictionary for JSON Conversion. Single Array Format (Row - Col : Value) 
+				//$arr [$r . "-" .$c] = $gameBoard[$r][$c]->get_value();
+				$arr [$r . "-" .$c] = array("value"=>$gameBoard[$r][$c]->get_value(),"beenChecked"=>$gameBoard[$r][$c]->get_beenChecked());				
+				//echo " I have stored an cell object in Associative array";
+				}// End Inner 
+			}// End Outer 
+			//}
+			
+			
+			$JSONBoard = json_encode($arr,JSON_FORCE_OBJECT);
+			
+			$_SESSION['board']= $JSONBoard;
+			} //End Function
+			
+			session_start();
+			
+			// Run the Inital Board ONly Once.
+			if(!isset($_SESSION['board'])){
+				//echo "I am starting init game ";
+				init_Game();				
+				//echo "I have finished init Game";
+			}
+			
+			
+			// Function setting the cell been checked to true
+			// then saving session variable again. 
+			
+			function setAndSave($cRow, $cCol){
+				$selectedCell = $cRow . '-' . $cCol;
+				$individualCell;
+				$list = json_decode($_SESSION['board'],true);
+				
+				$individualCell = $list[selectedCell];
+				$individualCell['beenChecked'] = 1;
+				
+				//$gameBoard[$cRow][$cCol]->beenChecked = true;
+				
+				checkWinner();
+				
+				// If Session is not win or loose update Table 
+				
+			}
+			
+			// This Function checks winning condition. It will be called after every click in Javascript
+			function checkWinner(){
+				session_start();
+				
+				for($r =0;  $r <$rowCount; $r++){
+					for($c=0; $c<$colCount; $c++){
+						//First Check if Mine if not a mine check viewed Value
+						if (gameBoard[$r][$c]->mine != -1){
+							
+							// Checking Been Checked Value 
+							if ($gameBoard[$r][$c]->beenChecked == 0){
+								// Not All Cells have been checked
+								$_SESSION['status'] = 0;
+								return;
+							}
+						}else if (gameBoard[$r][$c]->mine == -1 && $gameBoard[$r][$c]->beenChecked == 1){
+							// They Lost the Game
+							$_SESSION['status'] = -1;
+							return;
+						}
+						
+					}// End Innner
+					
+				}// end Outer
+				
+				$_SESSION['status'] = 1;
+				
+			}
+			
+			
+			$list = json_decode($_SESSION['board'],true);
+			/*var_dump($list);
+			$x = $list['0-0'];
+			echo " THis is before the specific Value <br>";
+			var_dump($x);
+			$x['beenChecked'] = 1;
+			echo $x["beenChecked"];
+			echo json_decode($_SESSION['board']);*/
+			//session_destroy();
+		?>
+		<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+		<script>
+			function myFunction(id)
+			{
+				//var list = <?php echo json_encode($list, JSON_FORCE_OBJECT) ?>;
+				//document.getElementById("id").innerHTML = list['id']['value'];
+				<?php echo 'hello' ?>;
+			}
+		</script>
+		<table id = "GameBoard" border="1" style = "border-collapse: collapse">
+			<tr>
+				<td id = '0-0' onclick = "myFunction(this)">.</td>
+				<td id = "0-1" onclick = "myFunction(this)">.</td>
+				<td id = "0-2" onclick = "myFunction(this)">.</td>
+				<td id = "0-3" onclick = "myFunction(this)">.</td>
+				<td id = "0-4" onclick = "myFunction(this)">.</td>
+				<td id = "0-5" onclick = "myFunction(this)">.</td>
+				<td id = "0-6" onclick = "myFunction(this)">.</td>
+				<td id = "0-7" onclick = "myFunction(this)">.</td>
+				<td id = "0-8" onclick = "myFunction(this)">.</td>
+			</tr>
+			<tr>
+				<td id = '1-0' onclick = "myFunction(this)">.</td>
+				<td id = "1-1" onclick = "myFunction(this)">.</td>
+				<td id = "1-2" onclick = "myFunction(this)">.</td>
+				<td id = "1-3" onclick = "myFunction(this)">.</td>
+				<td id = "1-4" onclick = "myFunction(this)">.</td>
+				<td id = "1-5" onclick = "myFunction(this)">.</td>
+				<td id = "1-6" onclick = "myFunction(this)">.</td>
+				<td id = "1-7" onclick = "myFunction(this)">.</td>
+				<td id = "1-8" onclick = "myFunction(this)">.</td>
+			</tr>
+			<tr>
+				<td id = "2-0" onclick = "myFunction(this)">.</td>
+				<td id = "2-1" onclick = "myFunction(this)">.</td>
+				<td id = "2-2" onclick = "myFunction(this)">.</td>
+				<td id = "2-3" onclick = "myFunction(this)">.</td>
+				<td id = "2-4" onclick = "myFunction(this)">.</td>
+				<td id = "2-5" onclick = "myFunction(this)">.</td>
+				<td id = "2-6" onclick = "myFunction(this)">.</td>
+				<td id = "2-7" onclick = "myFunction(this)">.</td>
+				<td id = "2-8" onclick = "myFunction(this)">.</td>
+			</tr>
+			<tr>
+				<td id = "3-0" onclick = "myFunction(this)">.</td>
+				<td id = "3-1" onclick = "myFunction(this)">.</td>
+				<td id = "3-2" onclick = "myFunction(this)">.</td>
+				<td id = "3-3" onclick = "myFunction(this)">.</td>
+				<td id = "3-4" onclick = "myFunction(this)">.</td>
+				<td id = "3-5" onclick = "myFunction(this)">.</td>
+				<td id = "3-6" onclick = "myFunction(this)">.</td>
+				<td id = "3-7" onclick = "myFunction(this)">.</td>
+				<td id = "3-8" onclick = "myFunction(this)">.</td>
+			</tr>
+			<tr>
+				<td id = "4-0" onclick = "myFunction(this)">.</td>
+				<td id = "4-1" onclick = "myFunction(this)">.</td>
+				<td id = "4-2" onclick = "myFunction(this)">.</td>
+				<td id = "4-3" onclick = "myFunction(this)">.</td>
+				<td id = "4-4" onclick = "myFunction(this)">.</td>
+				<td id = "4-5" onclick = "myFunction(this)">.</td>
+				<td id = "4-6" onclick = "myFunction(this)">.</td>
+				<td id = "4-7" onclick = "myFunction(this)">.</td>
+				<td id = "4-8" onclick = "myFunction(this)">.</td>
+			</tr>
+			<tr>
+				<td id = "5-0" onclick = "myFunction(this)">.</td>
+				<td id = "5-1" onclick = "myFunction(this)">.</td>
+				<td id = "5-2" onclick = "myFunction(this)">.</td>
+				<td id = "5-3" onclick = "myFunction(this)">.</td>
+				<td id = "5-4" onclick = "myFunction(this)">.</td>
+				<td id = "5-5" onclick = "myFunction(this)">.</td>
+				<td id = "5-6" onclick = "myFunction(this)">.</td>
+				<td id = "5-7" onclick = "myFunction(this)">.</td>
+				<td id = "5-8" onclick = "myFunction(this)">.</td>
+			</tr>
+			<tr>
+				<td id = "6-0" onclick = "myFunction(this)">.</td>
+				<td id = "6-1" onclick = "myFunction(this)">.</td>
+				<td id = "6-2" onclick = "myFunction(this)">.</td>
+				<td id = "6-3" onclick = "myFunction(this)">.</td>
+				<td id = "6-4" onclick = "myFunction(this)">.</td>
+				<td id = "6-5" onclick = "myFunction(this)">.</td>
+				<td id = "6-6" onclick = "myFunction(this)">.</td>
+				<td id = "6-7" onclick = "myFunction(this)">.</td>
+				<td id = "6-8" onclick = "myFunction(this)">.</td>
+			</tr>
+			<tr>
+				<td id = "7-0" onclick = "myFunction(this)">.</td>
+				<td id = "7-1" onclick = "myFunction(this)">.</td>
+				<td id = "7-2" onclick = "myFunction(this)">.</td>
+				<td id = "7-3" onclick = "myFunction(this)">.</td>
+				<td id = "7-4" onclick = "myFunction(this)">.</td>
+				<td id = "7-5" onclick = "myFunction(this)">.</td>
+				<td id = "7-6" onclick = "myFunction(this)">.</td>
+				<td id = "7-7" onclick = "myFunction(this)">.</td>
+				<td id = "7-8" onclick = "myFunction(this)">.</td>
+			</tr>
+			<tr>
+				<td id = "8-0" onclick = "myFunction(this)">.</td>
+				<td id = "8-1" onclick = "myFunction(this)">.</td>
+				<td id = "8-2" onclick = "myFunction(this)">.</td>
+				<td id = "8-3" onclick = "myFunction(this)">.</td>
+				<td id = "8-4" onclick = "myFunction(this)">.</td>
+				<td id = "8-5" onclick = "myFunction(this)">.</td>
+				<td id = "8-6" onclick = "myFunction(this)">.</td>
+				<td id = "8-7" onclick = "myFunction(this)">.</td>
+				<td id = "8-8" onclick = "myFunction(this)">.</td>
+			</tr>
+			</table>
+		<?php //session_destroy(); ?>
+	</body>
+</html>
