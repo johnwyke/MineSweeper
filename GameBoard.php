@@ -283,17 +283,19 @@
 			// Function setting the cell been checked to true
 			// then saving session variable again. 
 			
-			function setAndSave($cRow, $cCol){
-				$selectedCell = $cRow . '-' . $cCol;
+			function setAndSave($cRowcCol){
+				//$selectedCell = $cRow . '-' . $cCol;
+				echo "Im in setAndSave";
 				$individualCell;
 				$list = json_decode($_SESSION['board'],true);
 				
-				$individualCell = $list[selectedCell];
+				$individualCell = $list[cRowcCol];
 				$individualCell['beenChecked'] = 1;
 				
 				//$gameBoard[$cRow][$cCol]->beenChecked = true;
 				
-				checkWinner();
+				//checkWinner();
+				return $individualCell['value'];
 				
 				// If Session is not win or loose update Table 
 				
@@ -343,14 +345,16 @@
 		<script>
 			function myFunction(id)
 			{
-				//var list = <?php echo json_encode($list, JSON_FORCE_OBJECT) ?>;
+				//var selectedCell = "<?php echo setAndSave(id); ?>"
+				//var list = <?php echo json_encode($list, JSON_FORCE_OBJECT) >?;
 				//document.getElementById("id").innerHTML = list['id']['value'];
-				<?php echo 'hello' ?>;
+				//id.innerHTML = selectedCell;
+				//<?php echo "Im here" ?>;
 			}
 		</script>
 		<table id = "GameBoard" border="1" style = "border-collapse: collapse">
 			<tr>
-				<td id = '0-0' onclick = "myFunction(this)">.</td>
+				<td id = "0-0" onclick = "myFunction(this)">.</td>
 				<td id = "0-1" onclick = "myFunction(this)">.</td>
 				<td id = "0-2" onclick = "myFunction(this)">.</td>
 				<td id = "0-3" onclick = "myFunction(this)">.</td>
