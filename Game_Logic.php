@@ -276,12 +276,13 @@
 			// Function setting the cell been checked to true
 			// then saving session variable again. 
 			
-			function setAndSave($cRow, $cCol){
-				$selectedCell = $cRow . '-' . $cCol;
+			function setAndSave($RowCol){
+				
+				echo "I am in Set Save";
 				$individualCell;
 				$list = json_decode($_SESSION['board'],true);
 				
-				$individualCell = $list[selectedCell];
+				$individualCell = $list[RowCol];
 				$individualCell['beenChecked'] = 1;
 				
 				//$gameBoard[$cRow][$cCol]->beenChecked = true;
