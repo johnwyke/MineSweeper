@@ -43,7 +43,7 @@
 			function myFunction(obj)
 			{
 				
-				alert("here1" + obj.id);
+			//	alert("here1" + obj.id);
 
 				$.ajax({
 				        url: "http://cs3750juan.epizy.com/LearningJson.php",
