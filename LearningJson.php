@@ -264,10 +264,11 @@
 			if(!isset($_SESSION['board'])){
 				//echo "I am starting init game ";
 				init_Game();				
+				exit;
 				//echo "I have finished init Game";
 			}
 			
-			if(isset($_GET['cellobjid']))
+		if(isset($_GET['cellobjid']))
 		{
 			// Function setting the cell been checked to true
 			// then saving session variable again. 
@@ -277,17 +278,18 @@
 				$individualCell;
 				$list = json_decode($_SESSION['board'],true);
 				
-				$individualCell = $list[$_GET['cellobjid']];
-				$individualCell['beenChecked'] = 1;
-				
+				//$individualCell = $list[$_GET['cellobjid']];
+				//$individualCell['beenChecked'] = 1;
+				$list[$_GET['cellobjid']]['beenChecked'] = 1;
 				//$gameBoard[$cRow][$cCol]->beenChecked = true;
 				
 				//checkWinner();
-				echo $individualCell['value'];
 				
+				//echo $individualCell['value'];
+				$_SESSION['board'] = json_encode($list,JSON_FORCE_OBJECT);
+				echo $list[$_GET['cellobjid']]['value'];
 		}
-			
-			
+						
 			// This Function checks winning condition. It will be called after every click in Javascript
 			
 		/*		session_start();

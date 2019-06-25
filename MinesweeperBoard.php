@@ -9,7 +9,7 @@
 		</style>
 	</head>
 	
-	<body> 
+	<body id="body"> 
 		<?php
 			if(isset($_POST['postcounter']))
 			{
@@ -34,10 +34,11 @@
 		?>
 		<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
 		<script>
+		
 			function myFunction(obj)
 			{
 				$.ajax({
-				        url: "http://3750larsen.epizy.com/LearningJson.php",
+				        url: "http://3750grp5minesweeper.epizy.com/LearningJson.php",
 				        method: "GET",
 				        async: false,
 				        data: { cellobjid : obj.id },
@@ -48,6 +49,31 @@
 				});
 				
 			}
+			function loadBoard(){
+				$.ajax({
+					url: "http://3750grp5minesweeper.epizy.com/ReloadBoard.php",
+					method:"GET",
+					async: false,					
+					dataType: "text",
+					success:function(Result){
+						// Need to loop through array and refill data.
+						//alert("I am in success");
+						var str = Result;
+						//alert(Result);
+						var arrs = JSON.parse(str);
+						//alert(arrs);
+						$.each(arrs, function(key,value){
+							if (value['beenChecked'] == "1"){
+								//alert("I have a cell that has beenchecked");
+							document.getElementById(key).innerHTML = value['value'];
+							}else{}//alert("beenChecked did not fire");}
+							//alert("My Cell is " + key +" and my value is "+ value['value']);
+						});						
+					}
+				});
+			}// End Function
+			
+			document.getElementById("body").onload = function() {loadBoard();};
 		</script>
 		<table id = "GameBoard" border="1" style = "border-collapse: collapse">
 			<tr>
@@ -150,6 +176,6 @@
 				<td id = "8-8" onclick = "myFunction(this)">.</td>
 			</tr>
 			</table>
-		<?php //session_destroy(); ?>
+		<?php session_destroy(); ?>
 	</body>
 </html>
