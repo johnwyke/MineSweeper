@@ -360,11 +360,11 @@
 		?>
 		<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
 		<script>
-			function myFunction(id)
+			function myFunction(obj)
 			{
 				/*var gameCell = JSON.parse('<?php echo json_encode($list);?>');
 				echo gameCell;*/
-				alert("here1");
+				alert("here1" + obj.id);
 				
 
 				/*$.post('http://cs3750juan.epizy.com/GameBoard.php',{testCallingFunction:value},
@@ -377,11 +377,11 @@
 				        url: "http://cs3750juan.epizy.com/LearningJson.php",
 				        method: "GET",
 				        async: false,
-				        data: {funcion: "funcion1"},
-				        dataType: "json",
-				        success: function(respuesta) {
-				         	location.href = "http://cs3750juan.epizy.com/login.php";
-					}
+				        data: { cellobjid : obj.id },
+				        dataType: "text",
+				        success: function(data) {
+				         	alert("I got an AJAX reply: " + data);
+					    }
 				});
 				
 			}

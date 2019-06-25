@@ -44,6 +44,15 @@
 				 }
 				 function stopCounter()
 				 {
+				 	/*$.post('http://cs3750juan.epizy.com/playGame.php',{postcounter:counter},
+				 	function(data) {
+				 		//$('#result').html(data);	
+				 	});*/
+				 	counter = 0;
+				 }
+
+				  function stopCounterWin()
+				 {
 				 	$.post('http://cs3750juan.epizy.com/playGame.php',{postcounter:counter},
 				 	function(data) {
 				 		//$('#result').html(data);	
@@ -351,6 +360,10 @@
 		elseif (!empty($won)) {
 		    unset($_SESSION['minesweeper']);
 		    echo '<p>Congratulations. You won :).';
+		     echo '<script type="text/javascript">',
+     					'stopCounterWin();',
+    					 '</script>';
+    		header("Refresh: 1; url = http://cs3750juan.epizy.com/playGame.php");
 		}
 
 		function clearSweeper()
