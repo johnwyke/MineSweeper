@@ -1,5 +1,4 @@
 <?php
-
 				class cell{
 				private $mine; 
 				private $value; 
@@ -268,7 +267,6 @@
 				//echo "I have finished init Game";
 			}
 			
-
 			if(isset($_GET['cellobjid']))
 		{
 			// Function setting the cell been checked to true
@@ -289,7 +287,6 @@
 				
 		}
 			
-
 			
 			// This Function checks winning condition. It will be called after every click in Javascript
 			
@@ -317,5 +314,4 @@
 				}// end Outer
 				
 				$_SESSION['status'] = 1;*/
-
 ?>
