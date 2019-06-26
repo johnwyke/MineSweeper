@@ -44,7 +44,14 @@
 				        data: { cellobjid : obj.id },
 				        dataType: "text",
 				        success: function(data) {
-							obj.innerHTML = data;
+							if (data == "-99" ){
+								obj.innerHTML = "*";
+								document.getElementById("winlose").innerHTML = "You Lost";
+							}else if(data == "100"){
+								document.getElementById("winlose").innerHTML = "You Win";
+							}else{
+								obj.innerHTML = data;
+							}//alert(data);
 					    }
 				});
 				
@@ -176,6 +183,8 @@
 				<td id = "8-8" onclick = "myFunction(this)">.</td>
 			</tr>
 			</table>
+			
+			<div id="winlose"></div>
 		<?php session_destroy(); ?>
 	</body>
 </html>

@@ -65,16 +65,16 @@
 				
 				
 				if($gameBoard[$yCord][$xCord]->get_mine()){
-					echo "I am at a cell with a mine already";
+					//echo "I am at a cell with a mine already";
 					// Mine is already set try agian.
 					$mc--;
 					continue;
 				}			
 				
-				echo "Placing mine ";
+				//echo "Placing mine ";
 				$gameBoard[$yCord][$xCord]->set_mine(true); 
 				
-				echo "I am at position Row: " . $yCord ." Col: ".$xCord . "<br>";
+				//echo "I am at position Row: " . $yCord ." Col: ".$xCord . "<br>";
 				$mc++;
 			}// End of outer for 
 			
@@ -275,7 +275,7 @@
 			
 				//$selectedCell = $cRow . '-' . $cCol;
 			//	echo "Im in setAndSave";
-				$individualCell;
+				//$individualCell;
 				$list = json_decode($_SESSION['board'],true);
 				
 				//$individualCell = $list[$_GET['cellobjid']];
@@ -286,8 +286,45 @@
 				//checkWinner();
 				
 				//echo $individualCell['value'];
+				// Store the Updated game board.
 				$_SESSION['board'] = json_encode($list,JSON_FORCE_OBJECT);
-				echo $list[$_GET['cellobjid']]['value'];
+				
+				
+				if ($list[$_GET['cellobjid']]['beenChecked'] == 1 && $list[$_GET['cellobjid']]['value']== -1){
+					// they Lost 
+						$checkWinner= -1;
+				}else{
+					$listSize = count($list);
+					$cntr = 0;
+					// Needs to Check Winner Condition
+					foreach($list as $key => $value){
+						//echo "Checking Cell " .$key . " and my value is " . $value['value'] . " and Been Checked is: " . $value['beenChecked'];
+						if($value['beenChecked']!= 1 && $cntr < $listSize){
+								// Not All Cells have benn checked
+								// Still Playing
+								$checkWinner=0;
+								break;
+							
+						}else{// They win
+							$checkWinner = 1;
+						}
+						$cntr++;
+					}
+				}
+				//echo " I am a winner/ looser" . $checkWinner;				
+				if($checkWinner == -1){					
+					// They Lost
+					echo "-99";
+					session_destroy();
+				}elseif($checkWinner == 0){					
+					// Still Playing
+					echo $list[$_GET['cellobjid']]['value'];					
+				}else{					
+					// Winner Winner
+					echo"100";
+					session_destroy();
+					
+				}
 		}
 						
 			// This Function checks winning condition. It will be called after every click in Javascript
