@@ -96,7 +96,7 @@
 					    }
 				});
 				
-			}
+			}/*
 			function loadBoard(){
 				$.ajax({
 					url: "http://3750grp5minesweeper.epizy.com/ReloadBoard.php",
@@ -119,9 +119,9 @@
 						});						
 					}
 				});
-			}// End Function
+			}// End Function*/
 			
-			document.getElementById("body").onload = function() {loadBoard();};
+			//document.getElementById("body").onload = function() {loadBoard();};
 		</script>
 		<script src="http://code.jquery.com/jquery-1.10.2.js"></script>
 				<script src="http://code.jquery.com/ui/1.11.2/jquery-ui.js"></script>

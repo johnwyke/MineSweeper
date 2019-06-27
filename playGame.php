@@ -88,10 +88,9 @@
 		?>
 		<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
 		<script>
+
 			function myFunction(obj)
 			{
-
-				var clear;
 				$.ajax({
 				        url: "http://cs3750juan.epizy.com/LearningJson.php",
 				        method: "GET",
@@ -99,43 +98,43 @@
 				        data: { cellobjid : obj.id },
 				        dataType: "text",
 				        success: function(data) {
-				         	obj.innerHTML = data;
-				         	clear = data;
+							if (data == "-99" ){
+								obj.innerHTML = "*";
+								document.getElementById("winlose").innerHTML = "You Lost";
+							}else if(data == "100"){
+								document.getElementById("winlose").innerHTML = "You Win";
+							}else{
+								obj.innerHTML = data;
+								alert(data);
+							}//alert(data);
 					    }
 				});
-				if(clear == -1)
-				{
-					 $.ajax({
-					        url: "http://cs3750juan.epizy.com/LearningJson.php",
-					        method: "GET",
-					        async: false,
-					        data: { stopMines : counter },
-					        dataType: "text",
-					        success: function(data) {
-					         	//obj.innerHTML = data;
-					       //  	alert(data);
-					         	clearTimer();
-						    }
-					});
-
-					/* $.ajax({
-					        url: "http://cs3750juan.epizy.com/LearningJson.php",
-					        method: "GET",
-					        async: false,
-					        data: { showScores : counter },
-					        dataType: "text",
-					        success: function(data) {
-					         	//obj.innerHTML = data;
-					        // 	alert(data);
-					         //	clearTimer();
-						    }
-					});*/
-					location.href = "Refresh: 1; url = http://cs3750juan.epizy.com/scoresMinesweeper.php";
-					 
-
-					location.reload();		
-				}	
+				
 			}
+			function loadBoard(){
+				$.ajax({
+					url: "http://cs3750juan.epizy.com/ReloadBoard.php",
+					method:"GET",
+					async: false,					
+					dataType: "text",
+					success:function(Result){
+						// Need to loop through array and refill data.
+						//alert("I am in success");
+						var str = Result;
+						//alert(Result);
+						var arrs = JSON.parse(str);
+						//alert(arrs);
+						$.each(arrs, function(key,value){
+							if (value['beenChecked'] == "1"){
+								//alert("I have a cell that has beenchecked");
+							document.getElementById(key).innerHTML = value['value'];
+							}else{}//alert("beenChecked did not fire");}
+							//alert("My Cell is " + key +" and my value is "+ value['value']);
+						});						
+					}
+				});
+			}// End Function
+			document.getElementById("body").onload = function() {loadBoard();};
 		</script>
 		<script src="http://code.jquery.com/jquery-1.10.2.js"></script>
 				<script src="http://code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
@@ -285,6 +284,7 @@
 				<td id = "8-8" onclick = "myFunction(this)">.</td>
 			</tr>
 			</table>
-		<?php //session_destroy(); ?>
+		<div id="winlose"></div>
+		<?php session_destroy(); ?>
 	</body>
 </html>
