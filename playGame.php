@@ -85,6 +85,8 @@
 				header("Refresh: 1; url = http://cs3750juan.epizy.com/scoresMinesweeper.php");	
 
 			}
+			$_SESSION["user_name"] = $user;
+
 		?>
 
 
@@ -202,9 +204,10 @@
 				 	counter = 0;
 				 	localStorage.setItem("seconds",counter);
 				 } 
+				 document.getElementById("Board").onload = function() {loadBoard();};
 			</script>
 
-		<table id = "GameBoard" border="1" style = "border-collapse: collapse">
+		<table id = "Board" border="1" style = "border-collapse: collapse">
 			<tr>
 				<td id = "0-0" onclick = "myFunction(this)">.</td>
 				<td id = "0-1" onclick = "myFunction(this)">.</td>

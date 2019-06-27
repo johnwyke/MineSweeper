@@ -9,14 +9,7 @@
 		</style>
 	</head>
 	
-	<body onload='timer=setInterval("countUP()", 1000 );'> 
-
-		<form action="#" method="post">
-			<button type ="submit" name="logout" value="send to database">Logout</button>			
-			<button type ="submit" name="scores" value="send to database">Scores</button>	
-    	</form>
-    	<br/>	
-    	Time: <div id="timer_container"></div>
+	<body id="body"> 
 
     	<script type="text/javascript">
 			function clearTimer()
