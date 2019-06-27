@@ -315,37 +315,10 @@
 					}
 				}
 				//echo " I am a winner/ looser" . $checkWinner;				
-				if($checkWinner == -1){	
-
-					$time = "200";
-						$user = $_SESSION["user_name"];
-						
-						$servername = "sql304.epizy.com";
-						$username = "epiz_23868833";
-						$password = "oZwNrrIhSLY3r";
-						$dbname =  "epiz_23868833_game";
-
-						$conn = new mysqli($servername, $username,$password,$dbname);
-
-						if($conn->connect_error)
-						{
-							die("Connection failed:". $conn->connect_error);
-						}
-						$sql = "SELECT * FROM  GameMines WHERE User = '" . $user . "'";
-						$result = $conn->query($sql);
-						if($result->num_rows > 0)
-						{
-							$row = $result->fetch_assoc();
-							$idUser = $row['ID'];
-							$query = "INSERT INTO Scores (IDName, Score) VALUES ('" . $idUser . "', '" . $time . "')"; 
-							mysqli_query($conn,$query);
-							echo $idUser." ".$time;
-							//session_start();
-							$_SESSION["user_name"] = $user;
-						}				
+				if($checkWinner == -1){				
 					// They Lost
 					echo "-99";
-					//session_destroy();
+					session_destroy();
 				}elseif($checkWinner == 0){					
 					// Still Playing
 					echo $list[$_GET['cellobjid']]['value'];					
