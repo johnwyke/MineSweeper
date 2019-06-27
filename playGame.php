@@ -8,17 +8,16 @@
 			}
 		</style>
 	</head>
-	
+	Time: <div id="timer_container"></div>
 	<body onload='timer=setInterval("countUP()", 1000 );'> 
-
 		<form action="#" method="post">
 			<button type ="submit" name="logout" value="send to database">Logout</button>			
 			<button type ="submit" name="scores" value="send to database">Scores</button>	
     	</form>
     	<br/>	
-    	Time: <div id="timer_container"></div>
-
-    	<script type="text/javascript">
+    	
+		<p>
+			<script type="text/javascript">
 			function clearTimer()
 				 {
 				 	counter = 0;
@@ -35,13 +34,14 @@
 			if (isset($_POST['logout']))
         	{
         			session_start();
-        		//	insert();
+
         			echo '<script type="text/javascript">',
      					'clearTimer();',
     					 '</script>';
 					$_SESSION["user_name"] = "";
 					unset($_SESSION['user_name']);
-					header("Refresh: 1; url = http://cs3750juan.epizy.com/login.php");
+					header("Refresh: 1; url = http://cs3750juan.epizy.com/login.php");		             	
+				//	header("Refresh: 1; url = http://cs3750juan.epizy.com/scoresMinesweeper.php");
 			}
 	
 			if(isset($_POST['postcounter']))
@@ -49,8 +49,6 @@
 				$time = $_POST['postcounter'];
 				$user = $_SESSION["user_name"];
 				
-				echo "Done";
-
 				$servername = "sql304.epizy.com";
 				$username = "epiz_23868833";
 				$password = "oZwNrrIhSLY3r";
@@ -76,7 +74,6 @@
 				}
 
 			}
-			
 
 			if(isset($_POST['scores']))
 			{
@@ -85,20 +82,16 @@
 				header("Refresh: 1; url = http://cs3750juan.epizy.com/scoresMinesweeper.php");	
 
 			}
-			$_SESSION["user_name"] = $user;
+
+			
 
 		?>
-
-
-
 		<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
 		<script>
-		
-				  
-
 			function myFunction(obj)
 			{
-			//	insertWinner();
+
+				var clear;
 				$.ajax({
 				        url: "http://cs3750juan.epizy.com/LearningJson.php",
 				        method: "GET",
@@ -106,33 +99,35 @@
 				        data: { cellobjid : obj.id },
 				        dataType: "text",
 				        success: function(data) {
-							if (data == "-99" ){
-								obj.innerHTML = "*";
-								document.getElementById("winlose").innerHTML = "You Lost";
-							//	stopCounter();
-								$.ajax({
-								        url: "http://cs3750juan.epizy.com/LearningJson.php",
-								        method: "GET",
-								        async: false,
-								        data: { stopMines : counter },
-								        dataType: "text",
-								        success: function(data) {
-								         	//obj.innerHTML = data;
-								       //  	alert(data);
-								         	clearTimer();
-									    }
-								});
-	
-
-							}else if(data == "100"){
-								document.getElementById("winlose").innerHTML = "You Win";
-							}else{
-								obj.innerHTML = data;
-							}//alert(data);
+				         	obj.innerHTML = data;
+				         	clear = data;
 					    }
 				});
-				
+				if(clear == -1)
+				{
+					obj.innerHTML = "*";
+					clearTimer();
+					
+				}
+				if(clear == 100)
+				{
+					//obj.innerHTML = "*";
+					document.getElementById("winlose").innerHTML = "You Won";
+					 $.ajax({
+					        url: "http://cs3750juan.epizy.com/LearningJson.php",
+					        method: "GET",
+					        async: false,
+					        data: { stopMines : counter },
+					        dataType: "text",
+					        success: function(data) {
+					         	//obj.innerHTML = data;
+					       //  	alert(data);
+					         	clearTimer();
+						    }
+					});		
+				}	
 			}
+
 			function loadBoard(){
 				$.ajax({
 					url: "http://cs3750juan.epizy.com/ReloadBoard.php",
@@ -159,7 +154,6 @@
 			
 		//	document.getElementById("body").onload = function() {loadBoard();};
 		</script>
-
 		<script src="http://code.jquery.com/jquery-1.10.2.js"></script>
 				<script src="http://code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
 				<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
@@ -185,28 +179,28 @@
 				 }
 				 function stopCounter()
 				 {
+				 	/*$.post('http://cs3750juan.epizy.com/playGame.php',{postcounter:counter},
+				 	function(data) {
+				 		//$('#result').html(data);	
+				 	});*/
 				 	counter = 0;
 				 }
 
-				  function insertWinner()
+				  function stopCounterWin()
 				 {
-				 	/*alert(counter);
 				 	$.post('http://cs3750juan.epizy.com/playGame.php',{postcounter:counter},
 				 	function(data) {
-				 		alert("The data is "+data);
-				 	});*/
-				 	
-					
-
+				 		//$('#result').html(data);	
+				 	});
+				 	counter = 0;
 				 }
 				 function clearTimer()
 				 {
 				 	counter = 0;
 				 	localStorage.setItem("seconds",counter);
 				 } 
-				 document.getElementById("Board").onload = function() {loadBoard();};
 			</script>
-
+		</p>
 		<table id = "Board" border="1" style = "border-collapse: collapse">
 			<tr>
 				<td id = "0-0" onclick = "myFunction(this)">.</td>
@@ -308,8 +302,8 @@
 				<td id = "8-8" onclick = "myFunction(this)">.</td>
 			</tr>
 			</table>
-			
+			<script type="text/javascript">loadBoard();</script>
 			<div id="winlose"></div>
-		<?php session_destroy(); ?>
+		<?php //session_destroy(); ?>
 	</body>
 </html>
