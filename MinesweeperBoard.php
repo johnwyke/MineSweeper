@@ -9,36 +9,92 @@
 		</style>
 	</head>
 	
-	<body id="body"> 
+	<body onload='timer=setInterval("countUP()", 1000 );'> 
+
+		<form action="#" method="post">
+			<button type ="submit" name="logout" value="send to database">Logout</button>			
+			<button type ="submit" name="scores" value="send to database">Scores</button>	
+    	</form>
+    	<br/>	
+    	Time: <div id="timer_container"></div>
+
+    	<script type="text/javascript">
+			function clearTimer()
+				 {
+				 	counter = 0;
+				 	localStorage.setItem("seconds",counter);
+				 }
+				  
+			</script>
 		<?php
-			if(isset($_POST['postcounter']))
-			{
-				echo "I am here";
-				header("Refresh: 1; url = http://cs3750juan.epizy.com/login.php");
-			}
-			if(isset($_POST['testCallingFunction']))
-			{
-				echo "I am here";
-				header("Refresh: 1; url = http://cs3750juan.epizy.com/login.php");
+
+			session_start();
+			$user = $_SESSION["user_name"];
+			echo "Welcome ".$user;
+
+			if (isset($_POST['logout']))
+        	{
+        			session_start();
+
+        			echo '<script type="text/javascript">',
+     					'clearTimer();',
+    					 '</script>';
+					$_SESSION["user_name"] = "";
+					unset($_SESSION['user_name']);
+					header("Refresh: 1; url = http://cs3750juan.epizy.com/login.php");
 			}
 	
-			//$list = json_decode($_SESSION['board'],true);
-			/*var_dump($list);
-			$x = $list['0-0'];
-			echo " THis is before the specific Value <br>";
-			var_dump($x);
-			$x['beenChecked'] = 1;
-			echo $x["beenChecked"];
-			echo json_decode($_SESSION['board']);*/
-			//session_destroy();
+			if(isset($_POST['postcounter']))
+			{
+				$time = $_POST['postcounter'];
+				$user = $_SESSION["user_name"];
+				
+				$servername = "sql304.epizy.com";
+				$username = "epiz_23868833";
+				$password = "oZwNrrIhSLY3r";
+				$dbname =  "epiz_23868833_game";
+
+				$conn = new mysqli($servername, $username,$password,$dbname);
+
+				if($conn->connect_error)
+				{
+					die("Connection failed:". $conn->connect_error);
+				}
+				$sql = "SELECT * FROM  GameMines WHERE User = '" . $user . "'";
+				$result = $conn->query($sql);
+				if($result->num_rows > 0)
+				{
+					$row = $result->fetch_assoc();
+					$idUser = $row['ID'];
+					$query = "INSERT INTO Scores (IDName, Score) VALUES ('" . $idUser . "', '" . $time . "')"; 
+					mysqli_query($conn,$query);
+					echo $idUser." ".$time;
+					session_start();
+					$_SESSION["user_name"] = $user;
+				}
+
+			}
+
+			if(isset($_POST['scores']))
+			{
+				session_start();
+				$_SESSION["user_name"] = $user;
+				header("Refresh: 1; url = http://cs3750juan.epizy.com/scoresMinesweeper.php");	
+
+			}
 		?>
+
+
+
 		<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
 		<script>
 		
+				  
+
 			function myFunction(obj)
 			{
 				$.ajax({
-				        url: "http://3750grp5minesweeper.epizy.com/LearningJson.php",
+				        url: "http://cs3750juan.epizy.com/LearningJson.php",
 				        method: "GET",
 				        async: false,
 				        data: { cellobjid : obj.id },
@@ -58,7 +114,7 @@
 			}
 			function loadBoard(){
 				$.ajax({
-					url: "http://3750grp5minesweeper.epizy.com/ReloadBoard.php",
+					url: "http://cs3750juan.epizy.com/ReloadBoard.php",
 					method:"GET",
 					async: false,					
 					dataType: "text",
@@ -82,6 +138,50 @@
 			
 			document.getElementById("body").onload = function() {loadBoard();};
 		</script>
+
+		<script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+				<script src="http://code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
+				<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+			<script type="text/javascript">
+				var counter = 0;
+				var timer;
+				if(localStorage.getItem("seconds") != null)
+				{
+					counter = parseInt(localStorage.getItem("seconds"));
+				}
+				else
+				{
+				 	counter = 0;
+				}
+					
+				function countUP () {
+
+					 counter = counter + 1;//increment the counter by 1
+					 	//display the new value in the div
+					 document.getElementById("timer_container").innerHTML = counter;
+					localStorage.setItem("seconds",counter);
+					 
+				 }
+				 function stopCounter()
+				 {
+				 	counter = 0;
+				 }
+
+				  function stopCounterWin()
+				 {
+				 	$.post('http://cs3750juan.epizy.com/playGame.php',{postcounter:counter},
+				 	function(data) {
+				 		//$('#result').html(data);	
+				 	});
+				 	counter = 0;
+				 }
+				 function clearTimer()
+				 {
+				 	counter = 0;
+				 	localStorage.setItem("seconds",counter);
+				 } 
+			</script>
+
 		<table id = "GameBoard" border="1" style = "border-collapse: collapse">
 			<tr>
 				<td id = "0-0" onclick = "myFunction(this)">.</td>

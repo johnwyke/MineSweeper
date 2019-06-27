@@ -65,16 +65,16 @@
 				
 				
 				if($gameBoard[$yCord][$xCord]->get_mine()){
-					echo "I am at a cell with a mine already";
+					//echo "I am at a cell with a mine already";
 					// Mine is already set try agian.
 					$mc--;
 					continue;
 				}			
 				
-				echo "Placing mine ";
+				//echo "Placing mine ";
 				$gameBoard[$yCord][$xCord]->set_mine(true); 
 				
-				echo "I am at position Row: " . $yCord ." Col: ".$xCord . "<br>";
+				//echo "I am at position Row: " . $yCord ." Col: ".$xCord . "<br>";
 				$mc++;
 			}// End of outer for 
 			
@@ -264,57 +264,71 @@
 			if(!isset($_SESSION['board'])){
 				//echo "I am starting init game ";
 				init_Game();				
+				exit;
 				//echo "I have finished init Game";
 			}
 			
-			if(isset($_GET['cellobjid']))
-			{
-				// Function setting the cell been checked to true
-				// then saving session variable again. 
+		if(isset($_GET['cellobjid']))
+		{
+			// Function setting the cell been checked to true
+			// then saving session variable again. 
+			
+				//$selectedCell = $cRow . '-' . $cCol;
+			//	echo "Im in setAndSave";
+				//$individualCell;
+				$list = json_decode($_SESSION['board'],true);
 				
-					//$selectedCell = $cRow . '-' . $cCol;
-				//	echo "Im in setAndSave";
-					$individualCell;
-					$list = json_decode($_SESSION['board'],true);
-					
-					$individualCell = $list[$_GET['cellobjid']];
-					$individualCell['beenChecked'] = 1;
-					
-					//$gameBoard[$cRow][$cCol]->beenChecked = true;
-					
-					//checkWinner();
-
-					session_start();
+				//$individualCell = $list[$_GET['cellobjid']];
+				//$individualCell['beenChecked'] = 1;
+				$list[$_GET['cellobjid']]['beenChecked'] = 1;
+				//$gameBoard[$cRow][$cCol]->beenChecked = true;
 				
-					for($r =0;  $r <$rowCount; $r++){
-						for($c=0; $c<$colCount; $c++){
-							//First Check if Mine if not a mine check viewed Value
-							if (gameBoard[$r][$c]->mine != -1){
-								
-								// Checking Been Checked Value 
-								if ($gameBoard[$r][$c]->beenChecked == 0){
-									// Not All Cells have been checked
-									$_SESSION['status'] = 0;
-									return;
-								}
-							}else if (gameBoard[$r][$c]->mine == -1 && $gameBoard[$r][$c]->beenChecked == 1){
-								// They Lost the Game
-								$_SESSION['status'] = -1;
-								return;
-							}
+				//checkWinner();
+				
+				//echo $individualCell['value'];
+				// Store the Updated game board.
+				$_SESSION['board'] = json_encode($list,JSON_FORCE_OBJECT);
+				
+				
+				if ($list[$_GET['cellobjid']]['beenChecked'] == 1 && $list[$_GET['cellobjid']]['value']== -1){
+					// they Lost 
+						$checkWinner= -1;
+				}else{
+					$listSize = count($list);
+					$cntr = 0;
+					// Needs to Check Winner Condition
+					foreach($list as $key => $value){
+						//echo "Checking Cell " .$key . " and my value is " . $value['value'] . " and Been Checked is: " . $value['beenChecked'];
+						if($value['beenChecked']!= 1 && $cntr < $listSize){
+								// Not All Cells have benn checked
+								// Still Playing
+								$checkWinner=0;
+								break;
 							
-						}// End Innner
-						
-					}// end Outer
+						}else{// They win
+							$checkWinner = 1;
+						}
+						$cntr++;
+					}
+				}
+				//echo " I am a winner/ looser" . $checkWinner;				
+				if($checkWinner == -1){					
+					// They Lost
+					echo "-99";
+					session_destroy();
+				}elseif($checkWinner == 0){					
+					// Still Playing
+					echo $list[$_GET['cellobjid']]['value'];					
+				}else{					
+					// Winner Winner
+					echo"100";
+					session_destroy();
 					
-					$_SESSION['status'] = 1;
-
-					echo $individualCell['value'];
-					
-			}
+				}
+		}
 
 
-			if(isset($_GET['stopMines']))
+		if(isset($_GET['stopMines']))
 			{
 				$time = $_GET['stopMines'];
 				$user = $_SESSION["user_name"];
@@ -344,19 +358,12 @@
 				}
 				//echo "Done";
 			}
-		
-			if(isset($_GET['showScores']))
-			{
-				session_start();
-				$_SESSION["user_name"] = $user;
-				header("Refresh: 1; url = http://cs3750juan.epizy.com/scoresMinesweeper.php",true,301);	
 
-				//echo "<script type='text/javascript'>window.top.location='http://cs3750juan.epizy.com/scoresMinesweeper.php';</script>"
-				exit();
-				//echo "Failed";
 
-			}
-			
+
+	
+
+						
 			// This Function checks winning condition. It will be called after every click in Javascript
 			
 		/*		session_start();

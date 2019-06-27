@@ -10,14 +10,15 @@
 	</head>
 	
 	<body onload='timer=setInterval("countUP()", 1000 );'> 
+
 		<form action="#" method="post">
 			<button type ="submit" name="logout" value="send to database">Logout</button>			
 			<button type ="submit" name="scores" value="send to database">Scores</button>	
     	</form>
     	<br/>	
     	Time: <div id="timer_container"></div>
-		<p>
-			<script type="text/javascript">
+
+    	<script type="text/javascript">
 			function clearTimer()
 				 {
 				 	counter = 0;
@@ -34,14 +35,13 @@
 			if (isset($_POST['logout']))
         	{
         			session_start();
-
+        		//	insert();
         			echo '<script type="text/javascript">',
      					'clearTimer();',
     					 '</script>';
 					$_SESSION["user_name"] = "";
 					unset($_SESSION['user_name']);
-					header("Refresh: 1; url = http://cs3750juan.epizy.com/login.php");		             	
-				//	header("Refresh: 1; url = http://cs3750juan.epizy.com/scoresMinesweeper.php");
+					header("Refresh: 1; url = http://cs3750juan.epizy.com/login.php");
 			}
 	
 			if(isset($_POST['postcounter']))
@@ -49,6 +49,8 @@
 				$time = $_POST['postcounter'];
 				$user = $_SESSION["user_name"];
 				
+				echo "Done";
+
 				$servername = "sql304.epizy.com";
 				$username = "epiz_23868833";
 				$password = "oZwNrrIhSLY3r";
@@ -74,6 +76,7 @@
 				}
 
 			}
+			
 
 			if(isset($_POST['scores']))
 			{
@@ -82,15 +85,18 @@
 				header("Refresh: 1; url = http://cs3750juan.epizy.com/scoresMinesweeper.php");	
 
 			}
-
-			
-
 		?>
+
+
+
 		<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
 		<script>
+		
+				  
 
 			function myFunction(obj)
 			{
+			//	insertWinner();
 				$.ajax({
 				        url: "http://cs3750juan.epizy.com/LearningJson.php",
 				        method: "GET",
@@ -101,11 +107,25 @@
 							if (data == "-99" ){
 								obj.innerHTML = "*";
 								document.getElementById("winlose").innerHTML = "You Lost";
+							//	stopCounter();
+								$.ajax({
+								        url: "http://cs3750juan.epizy.com/LearningJson.php",
+								        method: "GET",
+								        async: false,
+								        data: { stopMines : counter },
+								        dataType: "text",
+								        success: function(data) {
+								         	//obj.innerHTML = data;
+								       //  	alert(data);
+								         	clearTimer();
+									    }
+								});
+	
+
 							}else if(data == "100"){
 								document.getElementById("winlose").innerHTML = "You Win";
 							}else{
 								obj.innerHTML = data;
-								alert(data);
 							}//alert(data);
 					    }
 				});
@@ -134,8 +154,10 @@
 					}
 				});
 			}// End Function
-			document.getElementById("body").onload = function() {loadBoard();};
+			
+		//	document.getElementById("body").onload = function() {loadBoard();};
 		</script>
+
 		<script src="http://code.jquery.com/jquery-1.10.2.js"></script>
 				<script src="http://code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
 				<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
@@ -161,20 +183,19 @@
 				 }
 				 function stopCounter()
 				 {
-				 	/*$.post('http://cs3750juan.epizy.com/playGame.php',{postcounter:counter},
-				 	function(data) {
-				 		//$('#result').html(data);	
-				 	});*/
 				 	counter = 0;
 				 }
 
-				  function stopCounterWin()
+				  function insertWinner()
 				 {
+				 	/*alert(counter);
 				 	$.post('http://cs3750juan.epizy.com/playGame.php',{postcounter:counter},
 				 	function(data) {
-				 		//$('#result').html(data);	
-				 	});
-				 	counter = 0;
+				 		alert("The data is "+data);
+				 	});*/
+				 	
+					
+
 				 }
 				 function clearTimer()
 				 {
@@ -182,7 +203,7 @@
 				 	localStorage.setItem("seconds",counter);
 				 } 
 			</script>
-		</p>
+
 		<table id = "GameBoard" border="1" style = "border-collapse: collapse">
 			<tr>
 				<td id = "0-0" onclick = "myFunction(this)">.</td>
@@ -284,7 +305,8 @@
 				<td id = "8-8" onclick = "myFunction(this)">.</td>
 			</tr>
 			</table>
-		<div id="winlose"></div>
+			
+			<div id="winlose"></div>
 		<?php session_destroy(); ?>
 	</body>
 </html>
